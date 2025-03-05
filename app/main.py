@@ -9,7 +9,7 @@ app = FastAPI()
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-OLLAMA_API_URL = "http://127.0.0.1:11434/api/chat"
+OLLAMA_API_URL = "http://ollama:11434/api/chat"
 
 gemma2 ="hf.co/bartowski/gemma-2-2b-it-GGUF:Q6_K"
 
