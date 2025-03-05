@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DIY Chatbot</title>
+  <link href="https://fonts.googleapis.com/css?family=Roboto:400,500&display=swap" rel="stylesheet">
+  <style>
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: linear-gradient(135deg, hsl(230, 89%, 68%) 0%, hsl(274, 100%, 44%) 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    #chat-container {
+      background-color: #fff;
+      width: 60%;
+      max-width: 90%;
+      height: 600px;
+      border-radius: 10px;
+      box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    #chat {
+      flex-grow: 1;
+      padding: 20px;
+      overflow-y: auto;
+      border-bottom: 1px solid #eee;
+    }
+    #chat p {
+      margin: 10px 0;
+      line-height: 1.5;
+    }
+    #chat p strong {
+      display: block;
+      margin-bottom: 5px;
+      color: #333;
+    }
+
+    #input {
+      display: flex;
+      padding: 15px;
+      background: #fafafa;
+    }
+    #message {
+      flex-grow: 1;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 16px;
+    }
+    button {
+      padding: 10px 15px;
+      margin-left: 10px;
+      border: none;
+      border-radius: 5px;
+      background-color: hwb(222 38% 0%);
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: hwb(230 23% 7%);
+    }
+  </style>
+</head>
+<body>
+
+  <div id="chat-container">
+    <div id="chat"></div>
+    <div id="input">
+      <input type="text" id="message" placeholder="Message">
+      <button onclick="sendMessage()">Senden</button>
+    </div>
+  </div>
+
+  <script>
+    const chatBox = document.getElementById("chat");
+    const messageInput = document.getElementById("message");
+    let conversationHistory = [];
+
+    async function sendMessage() {
+      const message = messageInput.value.trim();
+      if (!message) return;
+
+      conversationHistory.push({ role: "user", content: message });
+      appendMessage("User", message);
+      messageInput.value = "";
+
+      const botMessageElement = appendMessage("Bot", "⏳");
+
+      const response = await fetch("/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(conversationHistory)
+      });
+
+      const reader = response.body.getReader();
+      let decoder = new TextDecoder("utf-8");
+      let assistantMessage = "";
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        let chunk = decoder.decode(value, { stream: true });
+        try {
+          let json = JSON.parse(chunk);
+          let textPart = json.message.content;
+          assistantMessage += textPart;
+          botMessageElement.innerHTML = `<strong>Bot:</strong> ${assistantMessage}`;
+        } catch (error) {
+          console.error("Fehler beim Parsen des Streams:", error);
+        }
+      }
+
+      conversationHistory.push({ role: "assistant", content: assistantMessage });
+    }
+
+    function appendMessage(sender, message) {
+      const messageElement = document.createElement("p");
+      messageElement.innerHTML = `<strong>${sender}:</strong> ${message}`;
+      chatBox.appendChild(messageElement);
+      chatBox.scrollTop = chatBox.scrollHeight;
+      return messageElement;
+    }
+  </script>
+
+</body>
+</html>
