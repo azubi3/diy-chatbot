@@ -1,11 +1,8 @@
 echo "Installing ollama docker"
-docker run -d -v ollama:/root/.ollama -p 127.0.0.1:11434:11434 --name ollama ollama/ollama
+docker run -d --restart=always --name ollama -p 11434:11434 ollama/ollama serve
 
 echo "Pulling model file"
 docker exec ollama ollama pull hf.co/bartowski/gemma-2-2b-it-GGUF:Q6_K
-
-echo "Start ollama"
-docker exec -it ollama ollama serve
 
 echo "Build docker image"
 docker build -t fastapi-chat app
