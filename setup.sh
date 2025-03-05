@@ -8,7 +8,7 @@ echo "Start ollama"
 docker exec -it ollama ollama serve
 
 echo "Build docker image"
-docker build -t fastapi-chat .
+docker build -t fastapi-chat app
 
-echo "Starting webserver under 127.0.0.1:8000"
-docker run -d --restart unless-stopped -p 8000:8000 fastapi-chat
+echo "Starting webserver under 127.0.0.1:80"
+docker run -d --restart unless-stopped -p 80:80 fastapi-chat
