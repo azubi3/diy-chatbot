@@ -1,6 +1,8 @@
 # diy-chatbot
 Self host a small language model on a cpu fast and simple.
 
+![image](image.png "Website")
+
 You will need docker on the host system.
 
 Then just simply use the commands provided in *setup.sh*
